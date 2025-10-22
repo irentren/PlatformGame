@@ -9,7 +9,6 @@ class Render : public Module
 public:
 
 	Render();
-
 	// Destructor
 	virtual ~Render();
 

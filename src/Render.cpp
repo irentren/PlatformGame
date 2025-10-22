@@ -7,6 +7,8 @@
 #define M_PI 3.14159265358979323846
 #endif
 
+const float ZOOM_LEVEL = 1.0f;
+
 Render::Render() : Module()
 {
 	name = "render";
@@ -125,34 +127,32 @@ bool Render::DrawTexture(SDL_Texture* texture, int x, int y, const SDL_Rect* sec
 
 	// SDL3 uses float rects for rendering
 	SDL_FRect rect;
-	rect.x = (float)((int)(camera.x * speed) + x * scale);
-	rect.y = (float)((int)(camera.y * speed) + y * scale);
+	float world_x = (float)((int)(camera.x * speed) + x * scale);
+	float world_y = (float)((int)(camera.y * speed) + y * scale);
+	float center_x = (float)(camera.w / 2);
+	float center_y = (float)(camera.h / 2);
+
+	rect.x = center_x + (world_x - center_x) * ZOOM_LEVEL;
+	rect.y = center_y + (world_y - center_y) * ZOOM_LEVEL;
 
 	if (section != NULL)
 	{
-		rect.w = (float)(section->w * scale);
-		rect.h = (float)(section->h * scale);
+		rect.w = (float)(section->w * scale * ZOOM_LEVEL);
+		rect.h = (float)(section->h * scale * ZOOM_LEVEL);
 	}
 	else
 	{
 		float tw = 0.0f, th = 0.0f;
-		if (!SDL_GetTextureSize(texture, &tw, &th))
-		{
-			LOG("SDL_GetTextureSize failed: %s", SDL_GetError());
-			return false;
-		}
-		rect.w = tw * scale;
-		rect.h = th * scale;
+		if (!SDL_GetTextureSize(texture, &tw, &th)) { return false; }
+		rect.w = tw * scale * ZOOM_LEVEL;
+		rect.h = th * scale * ZOOM_LEVEL;
 	}
 
 	const SDL_FRect* src = NULL;
 	SDL_FRect srcRect;
 	if (section != NULL)
 	{
-		srcRect.x = (float)section->x;
-		srcRect.y = (float)section->y;
-		srcRect.w = (float)section->w;
-		srcRect.h = (float)section->h;
+		srcRect = { (float)section->x, (float)section->y, (float)section->w, (float)section->h };
 		src = &srcRect;
 	}
 
@@ -160,8 +160,7 @@ bool Render::DrawTexture(SDL_Texture* texture, int x, int y, const SDL_Rect* sec
 	SDL_FPoint pivot;
 	if (pivotX != INT_MAX && pivotY != INT_MAX)
 	{
-		pivot.x = (float)pivotX;
-		pivot.y = (float)pivotY;
+		pivot = { (float)pivotX * scale * ZOOM_LEVEL, (float)pivotY * scale * ZOOM_LEVEL };
 		p = &pivot;
 	}
 
@@ -187,17 +186,19 @@ bool Render::DrawRectangle(const SDL_Rect& rect, Uint8 r, Uint8 g, Uint8 b, Uint
 	SDL_FRect rec;
 	if (use_camera)
 	{
-		rec.x = (float)((int)(camera.x + rect.x * scale));
-		rec.y = (float)((int)(camera.y + rect.y * scale));
-		rec.w = (float)(rect.w * scale);
-		rec.h = (float)(rect.h * scale);
+		float world_x = (float)((int)(camera.x + rect.x * scale));
+		float world_y = (float)((int)(camera.y + rect.y * scale));
+		float center_x = (float)(camera.w / 2);
+		float center_y = (float)(camera.h / 2);
+
+		rec.x = center_x + (world_x - center_x) * ZOOM_LEVEL;
+		rec.y = center_y + (world_y - center_y) * ZOOM_LEVEL;
+		rec.w = (float)(rect.w * scale * ZOOM_LEVEL);
+		rec.h = (float)(rect.h * scale * ZOOM_LEVEL);
 	}
 	else
 	{
-		rec.x = (float)(rect.x * scale);
-		rec.y = (float)(rect.y * scale);
-		rec.w = (float)(rect.w * scale);
-		rec.h = (float)(rect.h * scale);
+		rec = { (float)rect.x * scale, (float)rect.y * scale, (float)rect.w * scale, (float)rect.h * scale };
 	}
 
 	int result = (filled ? SDL_RenderFillRect(renderer, &rec) : SDL_RenderRect(renderer, &rec)) ? 0 : -1;
@@ -223,10 +224,18 @@ bool Render::DrawLine(int x1, int y1, int x2, int y2, Uint8 r, Uint8 g, Uint8 b,
 
 	if (use_camera)
 	{
-		X1 = (float)(camera.x + x1 * scale);
-		Y1 = (float)(camera.y + y1 * scale);
-		X2 = (float)(camera.x + x2 * scale);
-		Y2 = (float)(camera.y + y2 * scale);
+		float center_x = (float)(camera.w / 2);
+		float center_y = (float)(camera.h / 2);
+
+		float world_x1 = (float)(camera.x + x1 * scale);
+		float world_y1 = (float)(camera.y + y1 * scale);
+		X1 = center_x + (world_x1 - center_x) * ZOOM_LEVEL;
+		Y1 = center_y + (world_y1 - center_y) * ZOOM_LEVEL;
+
+		float world_x2 = (float)(camera.x + x2 * scale);
+		float world_y2 = (float)(camera.y + y2 * scale);
+		X2 = center_x + (world_x2 - center_x) * ZOOM_LEVEL;
+		Y2 = center_y + (world_y2 - center_y) * ZOOM_LEVEL;
 	}
 	else
 	{
@@ -262,6 +271,25 @@ bool Render::DrawCircle(int x, int y, int radius, Uint8 r, Uint8 g, Uint8 b, Uin
 
 	float cx = (float)((use_camera ? camera.x : 0) + x * scale);
 	float cy = (float)((use_camera ? camera.y : 0) + y * scale);
+	float scale_final;
+
+	if (use_camera)
+	{
+		float screen_center_x = (float)(camera.w / 2);
+		float screen_center_y = (float)(camera.h / 2);
+		float world_x = (float)(camera.x + x * scale);
+		float world_y = (float)(camera.y + y * scale);
+
+		cx = screen_center_x + (world_x - screen_center_x) * ZOOM_LEVEL;
+		cy = screen_center_y + (world_y - screen_center_y) * ZOOM_LEVEL;
+		scale_final = (float)radius * scale * ZOOM_LEVEL;
+	}
+	else
+	{
+		cx = (float)(x * scale);
+		cy = (float)(y * scale);
+		scale_final= (float)radius * scale;
+	}
 
 	for (int i = 0; i < 360; ++i)
 	{

@@ -60,6 +60,7 @@ bool Player::Update(float dt)
 	Jump();
 	ApplyPhysics();
 	Draw(dt);
+
 	if (position.getX() < Engine::GetInstance().render->camera.w / 2) {
 	
 		Engine::GetInstance().render->camera.x = 0;
