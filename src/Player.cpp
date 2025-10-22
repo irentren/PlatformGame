@@ -28,12 +28,12 @@ bool Player::Awake() {
 bool Player::Start() {
 
 	// load
-	std::unordered_map<int, std::string> aliases = { {0,"idle"},{11,"move"},{22,"jump"} };
-	anims.LoadFromTSX("Assets/Textures/PLayer2_Spritesheet.tsx", aliases);
+	std::unordered_map<int, std::string> aliases = { {11,"idle"},{0,"move"},{4,"jump"} };
+	anims.LoadFromTSX("Assets/Textures/ghost-export.tsx", aliases);
 	anims.SetCurrent("idle");
 
 	//L03: TODO 2: Initialize Player parameters
-	texture = Engine::GetInstance().textures->Load("Assets/Textures/player2_spritesheet.png");
+	texture = Engine::GetInstance().textures->Load("Assets/Textures/ghost-export.png");
 
 	// L08 TODO 5: Add physics to the player - initialize physics body
 	//Engine::GetInstance().textures->GetSize(texture, texW, texH);
@@ -60,7 +60,8 @@ bool Player::Update(float dt)
 	Jump();
 	ApplyPhysics();
 	Draw(dt);
-
+	//L10: TODO 7: Center the camera on the player
+	Engine::GetInstance().render->camera.x = (int)(-position.getX() + Engine::GetInstance().render->camera.w / 2);
 	return true;
 }
 
@@ -75,12 +76,23 @@ void Player::Move() {
 	// Move left/right
 	if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT) {
 		velocity.x = -speed;
+		if (!isJumping) {
 		anims.SetCurrent("move");
-	}
+		
+		}
+	}/*else if(!isJumping){
+		anims.SetCurrent("idle");
+	}*/
 	if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT) {
 		velocity.x = speed;
-		anims.SetCurrent("move");
+		if (!isJumping) {
+			anims.SetCurrent("move");
+
+		}
 	}
+	/*else if (!isJumping) {
+		anims.SetCurrent("idle");
+	}*/
 }
 
 void Player::Jump() {
