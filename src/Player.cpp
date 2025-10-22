@@ -60,8 +60,20 @@ bool Player::Update(float dt)
 	Jump();
 	ApplyPhysics();
 	Draw(dt);
-	//L10: TODO 7: Center the camera on the player
+	if (position.getX() < Engine::GetInstance().render->camera.w / 2) {
+	
+		Engine::GetInstance().render->camera.x = 0;
+	}
+	/*else if (position.getX() > 1280 - Engine::GetInstance().render->camera.w / 2) {
+	
+		Engine::GetInstance().render->camera.x = 1280 - Engine::GetInstance().render->camera.w;
+	
+	}*/
+	else {
+
 	Engine::GetInstance().render->camera.x = (int)(-position.getX() + Engine::GetInstance().render->camera.w / 2);
+
+	}
 	return true;
 }
 
@@ -74,25 +86,20 @@ void Player::GetPhysicsValues() {
 void Player::Move() {
 	
 	// Move left/right
-	if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT) {
+	if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT && !isJumping) {
 		velocity.x = -speed;
-		if (!isJumping) {
 		anims.SetCurrent("move");
-		
-		}
-	}/*else if(!isJumping){
-		anims.SetCurrent("idle");
-	}*/
-	if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT) {
-		velocity.x = speed;
-		if (!isJumping) {
-			anims.SetCurrent("move");
-
-		}
 	}
-	/*else if (!isJumping) {
-		anims.SetCurrent("idle");
-	}*/
+	else if(Engine::GetInstance().input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT){
+		velocity.x = -speed;
+	}
+	if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT && !isJumping) {
+		velocity.x = speed;
+		anims.SetCurrent("move");
+	}
+	else if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT ) {
+		velocity.x = speed;
+	}
 }
 
 void Player::Jump() {

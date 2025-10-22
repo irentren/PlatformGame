@@ -36,7 +36,7 @@ private:
 	void Draw(float dt);
 
 public:
-
+	void Player::Setanimation();
 	//Declare player parameters
 	float speed = 4.0f;
 	SDL_Texture* texture = NULL;
@@ -50,7 +50,7 @@ public:
 	PhysBody* pbody;
 	float jumpForce = 2.5f; // The force to apply when jumping
 	bool isJumping = false; // Flag to check if the player is currently jumping
-
+	bool isMoving = false;
 private: 
 	b2Vec2 velocity;
 	AnimationSet anims;
