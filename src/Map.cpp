@@ -214,14 +214,14 @@ bool Map::Load(std::string path, std::string fileName)//
             }
         }
 
-        /*for (const auto& objectGroup : mapData.objectgroups) {
+        for (const auto& objectGroup : mapData.objectgroups) {
             if (objectGroup->name == "Collisions3") {
                 for (const auto& object : objectGroup->objects) {
                     PhysBody* c1 = Engine::GetInstance().physics.get()->CreateRectangle(object->x + object->width / 2, object->y + object->height / 2, object->width, object->height, STATIC);
                     c1->ctype = ColliderType::PLATFORM;
                 }
             }
-        }*/
+        }
 
         for (const auto& mapLayer : mapData.layers) {
             if (mapLayer->name == "Collisions") {
