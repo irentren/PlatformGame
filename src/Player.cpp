@@ -167,7 +167,7 @@ void Player::Reset()
 	
 	b2Vec2 initialPos = { PIXEL_TO_METERS(86), PIXEL_TO_METERS(86) };
 	b2Rot rotation = b2MakeRot(0.0f);
-	/*b2Body_SetTransform(pbody->body, initialPos, rotation);*/
+	b2Body_SetTransform(pbody->body, initialPos, rotation);
 }
 
 // L08 TODO 6: Define OnCollision function for the player. 
