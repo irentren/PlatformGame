@@ -194,8 +194,10 @@ void Player::OnCollision(PhysBody* physA, PhysBody* physB) {
 		physB->listener->Destroy();
 		break;
 	case ColliderType::UNKNOWN:
-		LOG("Collision DEATH");
-		Reset();
+		if (!godMode) {
+			LOG("Collision DEATH");
+			Reset();
+		}
 		break;
 	default:
 		break;
