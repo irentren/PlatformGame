@@ -31,6 +31,8 @@
    <frame tileid="19" duration="110"/>
    <frame tileid="20" duration="110"/>
    <frame tileid="21" duration="110"/>
+   <frame tileid="22" duration="50"/>
+   <frame tileid="23" duration="50"/>
   </animation>
  </tile>
 </tileset>
