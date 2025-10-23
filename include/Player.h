@@ -48,9 +48,12 @@ public:
 
 	// L08 TODO 5: Add physics to the player - declare a Physics body
 	PhysBody* pbody;
-	float jumpForce = 2.5f; // The force to apply when jumping
+	float jumpForce = 1.5f; // The force to apply when jumping
 	bool isJumping = false; // Flag to check if the player is currently jumping
 	bool isMoving = false;
+	bool secondJump = false;
+	bool firstJump = true;
+	bool godMode = false;
 private: 
 	b2Vec2 velocity;
 	AnimationSet anims;

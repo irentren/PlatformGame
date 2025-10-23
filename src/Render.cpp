@@ -7,7 +7,7 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-const float ZOOM_LEVEL = 1.0f;
+const float ZOOM_LEVEL = 2.0f;
 
 Render::Render() : Module()
 {
@@ -60,6 +60,7 @@ bool Render::Awake()
 		camera.h = Engine::GetInstance().window->height * scale;
 		camera.x = 0;
 		camera.y = 0;
+		
 	}
 
 	return ret;

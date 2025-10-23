@@ -61,20 +61,27 @@ bool Player::Update(float dt)
 	ApplyPhysics();
 	Draw(dt);
 
-	if (position.getX() < Engine::GetInstance().render->camera.w / 2) {
 	
-		Engine::GetInstance().render->camera.x = 0;
-	}
-	/*else if (position.getX() > 1280 - Engine::GetInstance().render->camera.w / 2) {
 	
-		Engine::GetInstance().render->camera.x = 1280 - Engine::GetInstance().render->camera.w;
-	
-	}*/
-	else {
+		Engine::GetInstance().render->camera.x = (int)(-position.getX() + Engine::GetInstance().render->camera.w / 2);
+		Engine::GetInstance().render->camera.y = (int)(-position.getY() + Engine::GetInstance().render->camera.h / 2);
 
-	Engine::GetInstance().render->camera.x = (int)(-position.getX() + Engine::GetInstance().render->camera.w / 2);
+		if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_F10) == KEY_DOWN) {
 
-	}
+			godMode = !godMode;
+
+		}
+	//}
+	///*else if (position.getX() > 1280 - Engine::GetInstance().render->camera.w / 2) {
+	//
+	//	Engine::GetInstance().render->camera.x = 1280 - Engine::GetInstance().render->camera.w;
+	//
+	//}*/
+	//else {
+
+	//Engine::GetInstance().render->camera.x = (int)(-position.getX() + Engine::GetInstance().render->camera.w / 2);
+
+	//}
 	return true;
 }
 
@@ -105,10 +112,23 @@ void Player::Move() {
 
 void Player::Jump() {
 	// This function can be used for more complex jump logic if needed
-	if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN && isJumping == false) {
+	if ((Engine::GetInstance().input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN && isJumping == false )|| Engine::GetInstance().input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN && isJumping && !secondJump) {
 		Engine::GetInstance().physics->ApplyLinearImpulseToCenter(pbody, 0.0f, -jumpForce, true);
 		anims.SetCurrent("jump");
 		isJumping = true;
+		if (firstJump) {
+		
+			secondJump = false;
+		}
+		else { secondJump = true; }
+		firstJump = false;
+		
+	}
+	if (godMode && (Engine::GetInstance().input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN)) {
+	
+	
+		Engine::GetInstance().physics->ApplyLinearImpulseToCenter(pbody, 0.0f, -jumpForce, true);
+		anims.SetCurrent("jump");
 	}
 }
 
@@ -150,6 +170,7 @@ void Player::OnCollision(PhysBody* physA, PhysBody* physB) {
 		LOG("Collision PLATFORM");
 		//reset the jump flag when touching the ground
 		isJumping = false;
+		firstJump = true;
 		anims.SetCurrent("idle");
 		break;
 	case ColliderType::ITEM:

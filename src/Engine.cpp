@@ -255,7 +255,15 @@ bool Engine::DoUpdate()
             break;
         }
     }
+    if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_F11) == KEY_DOWN) {
+        if (Engine::targetFrameRate == 60) {
 
+            Engine::targetFrameRate = 30;
+        }
+        else {
+            Engine::targetFrameRate = 60;
+        }
+    }
     return result;
 }
 
