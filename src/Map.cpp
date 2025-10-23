@@ -218,7 +218,7 @@ bool Map::Load(std::string path, std::string fileName)//
             if (objectGroup->name == "Collisions3") {
                 for (const auto& object : objectGroup->objects) {
                     PhysBody* c1 = Engine::GetInstance().physics.get()->CreateRectangle(object->x + object->width / 2, object->y + object->height / 2, object->width, object->height, STATIC);
-                    c1->ctype = ColliderType::PLATFORM;
+                    c1->ctype = ColliderType::UNKNOWN;
                 }
             }
         }

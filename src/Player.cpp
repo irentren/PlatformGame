@@ -21,7 +21,7 @@ Player::~Player() {
 bool Player::Awake() {
 
 	//L03: TODO 2: Initialize Player parameters
-	position = Vector2D(96, 96);
+	position = Vector2D(86, 86);
 	return true;
 }
 
@@ -162,6 +162,14 @@ bool Player::CleanUp()
 	return true;
 }
 
+void Player::Reset()
+{
+	
+	b2Vec2 initialPos = { PIXEL_TO_METERS(86), PIXEL_TO_METERS(86) };
+	b2Rot rotation = b2MakeRot(0.0f);
+	/*b2Body_SetTransform(pbody->body, initialPos, rotation);*/
+}
+
 // L08 TODO 6: Define OnCollision function for the player. 
 void Player::OnCollision(PhysBody* physA, PhysBody* physB) {
 	switch (physB->ctype)
@@ -172,14 +180,15 @@ void Player::OnCollision(PhysBody* physA, PhysBody* physB) {
 		isJumping = false;
 		firstJump = true;
 		anims.SetCurrent("idle");
-		break;
+		break;	
 	case ColliderType::ITEM:
 		LOG("Collision ITEM");
 		Engine::GetInstance().audio->PlayFx(pickCoinFxId);
 		physB->listener->Destroy();
 		break;
 	case ColliderType::UNKNOWN:
-		LOG("Collision UNKNOWN");
+		LOG("Collision DEATH");
+		Reset();
 		break;
 	default:
 		break;
