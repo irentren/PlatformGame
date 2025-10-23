@@ -56,6 +56,29 @@ struct MapLayer
     }
 };
 
+
+
+struct ObjectGroup
+{
+    // L07: TODO 1: Add the info to the MapLayer Struct
+    int id;
+    std::string name;
+    struct Object
+    {
+        // L07: TODO 1: Add the info to the MapLayer Struct
+        int id;
+        int width;
+        int height;
+        int x;
+        int y;
+
+    };
+
+
+    std::vector<Object*> objects;
+
+};
+
 // L06: TODO 2: Create a struct to hold information for a TileSet
 // Ignore Terrain Types and Tile Types for now, but we want the image!
 
@@ -97,6 +120,7 @@ struct MapData
 
     // L07: TODO 2: Add the info to the MapLayer Struct
     std::list<MapLayer*> layers;
+    std::list<ObjectGroup*> objectgroups;
 };
 
 class Map : public Module
