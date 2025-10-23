@@ -179,47 +179,49 @@ bool Map::Load(std::string path, std::string fileName)//
 
         for (pugi::xml_node objectGroupNode = mapFileXML.child("map").child("objectgroup"); objectGroupNode != NULL; objectGroupNode = objectGroupNode.next_sibling("objectgroup")) {
 
-            // L07: TODO 4: Implement the load of a single layer 
-            //Load the attributes and saved in a new MapLayer
             ObjectGroup* objectGroup = new ObjectGroup();
             objectGroup->id = objectGroupNode.attribute("id").as_int();
             objectGroup->name = objectGroupNode.attribute("name").as_string();
 
-            //L09: TODO 6 Call Load Layer Properties
-            /*LoadProperties(objectNode, ObjectNode->properties);*/
-
-            //Iterate over all the tiles and assign the values in the data array
+            // Itera sobre todos los objetos y asigna los valores en el array de datos
             for (pugi::xml_node objectNode = objectGroupNode.child("object"); objectNode != NULL; objectNode = objectNode.next_sibling("object")) {
                 ObjectGroup::Object* object = new ObjectGroup::Object();
-                object->height;
-                object->width;
-                object->x;
-                object->y;
+                object->id = objectNode.attribute("id").as_int();
+                object->x = objectNode.attribute("x").as_int();
+                object->y = objectNode.attribute("y").as_int();
+                object->width = objectNode.attribute("width").as_int();
+                object->height = objectNode.attribute("height").as_int();
 
-                /*objectGroup->objects.push_back(objectNode.attribute("gid").as_int());*/
+                objectGroup->objects.push_back(object);
             }
 
-            //add the layer to the map
             mapData.objectgroups.push_back(objectGroup);
         }
+
+            
 
         // L08 TODO 3: Create colliders
         // L08 TODO 7: Assign collider type
         // Later you can create a function here to load and create the colliders from the map
 
         //Iterate the layer and create colliders
-        for (const auto& objectNode : mapData.objectgroups) {
-            if (objectNode->name == "Capa de Objetos 1") {
-                for (int i = 0; i < mapData.height; i++) {
-                    for (int j = 0; j < mapData.width; j++) {
-                        ObjectGroup::Object* object = new ObjectGroup::Object();
-                        Vector2D mapCoord = MapToWorld(object->x, object->y);
-                        PhysBody* c1 = Engine::GetInstance().physics.get()->CreateRectangle(mapCoord.getX() + mapData.tileWidth / 2, mapCoord.getY() + mapData.tileHeight / 2, mapData.tileWidth, mapData.tileHeight, STATIC);
-                        c1->ctype = ColliderType::PLATFORM;
-                    }
+        for (const auto& objectGroup : mapData.objectgroups) {
+            if (objectGroup->name == "Collisions2") { 
+                for (const auto& object : objectGroup->objects) {
+                    PhysBody* c1 = Engine::GetInstance().physics.get()->CreateRectangle(object->x + object->width / 2, object->y + object->height / 2, object->width, object->height, STATIC);
+                    c1->ctype = ColliderType::PLATFORM;
                 }
             }
         }
+
+        /*for (const auto& objectGroup : mapData.objectgroups) {
+            if (objectGroup->name == "Collisions3") {
+                for (const auto& object : objectGroup->objects) {
+                    PhysBody* c1 = Engine::GetInstance().physics.get()->CreateRectangle(object->x + object->width / 2, object->y + object->height / 2, object->width, object->height, STATIC);
+                    c1->ctype = ColliderType::PLATFORM;
+                }
+            }
+        }*/
 
         for (const auto& mapLayer : mapData.layers) {
             if (mapLayer->name == "Collisions") {
