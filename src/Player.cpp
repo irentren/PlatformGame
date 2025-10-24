@@ -198,9 +198,7 @@ void Player::OnCollision(PhysBody* physA, PhysBody* physB) {
 		break;
 	case ColliderType::UNKNOWN:
 
-		LOG("Collision DEATH");
-		anims.SetCurrent("death");
-		Reset();
+	
 
 		if (!godMode) {
 			LOG("Collision DEATH");
