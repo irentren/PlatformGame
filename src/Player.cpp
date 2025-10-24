@@ -28,7 +28,10 @@ bool Player::Awake() {
 bool Player::Start() {
 
 	// load
+
 	std::unordered_map<int, std::string> aliases = { {11,"idle"},{0,"move"},{4,"jump"} ,{8, "death" }};
+
+
 	anims.LoadFromTSX("Assets/Textures/ghost-export.tsx", aliases);
 	anims.SetCurrent("idle");
 
@@ -100,6 +103,7 @@ void Player::Move() {
 	}
 	else if(Engine::GetInstance().input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT){
 		velocity.x = -speed;
+		
 	}
 	if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT && !isJumping) {
 		velocity.x = speed;
@@ -107,6 +111,12 @@ void Player::Move() {
 	}
 	else if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT ) {
 		velocity.x = speed;
+		
+	}
+	if(isJumping){
+		
+			anims.SetCurrent("jump");
+		
 	}
 }
 
@@ -187,9 +197,16 @@ void Player::OnCollision(PhysBody* physA, PhysBody* physB) {
 		physB->listener->Destroy();
 		break;
 	case ColliderType::UNKNOWN:
+
 		LOG("Collision DEATH");
 		anims.SetCurrent("death");
 		Reset();
+
+		if (!godMode) {
+			LOG("Collision DEATH");
+			Reset();
+		}
+
 		break;
 	default:
 		break;
