@@ -28,9 +28,9 @@ bool Player::Awake() {
 bool Player::Start() {
 
 	// load
-	std::unordered_map<int, std::string> aliases = { {15,"idle"},{0,"move"},{6,"jump"} };
 
-	std::unordered_map<int, std::string> aliases = { {11,"idle"},{0,"move"},{4,"jump"} ,{8, "death" }};
+
+	std::unordered_map<int, std::string> aliases = { {11,"idle"},{0,"move"},{4,"jump"}};
 
 
 	anims.LoadFromTSX("Assets/Textures/ghost-export.tsx", aliases);
@@ -204,6 +204,9 @@ void Player::OnCollision(PhysBody* physA, PhysBody* physB) {
 		if (!godMode) {
 			LOG("Collision DEATH");
 			Reset();
+		}
+		else {
+
 		}
 
 		break;
