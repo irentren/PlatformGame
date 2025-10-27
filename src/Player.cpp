@@ -68,18 +68,13 @@ bool Player::Update(float dt)
 	
 	Vector2D mapSize = Engine::GetInstance().map->GetMapSizeInPixels();
 	float limitLeft = Engine::GetInstance().render->camera.w / 4;
-	float limitRight = mapSize.getX() - Engine::GetInstance().render->camera.w * 3 / 4;
-	if (position.getX() - limitLeft > 0 && position.getX() < limitRight) {
-		Engine::GetInstance().render->camera.x = -position.getX() + Engine::GetInstance().render->camera.w / 4;
-	}
-	float limitUp = Engine::GetInstance().render->camera.h / 4;
-	float limitDown = mapSize.getY() - Engine::GetInstance().render->camera.h * 3 / 4;
-	if (position.getY() - limitUp > 0 && position.getY() < limitDown) {
-		Engine::GetInstance().render->camera.y = -position.getY() + Engine::GetInstance().render->camera.h / 4;
-	}
+	float limitRight = mapSize.getX() - Engine::GetInstance().render->camera.w;
+	/*if (position.getX() - limitLeft > 0 && position.getX() < limitRight) {
+		Engine::GetInstance().render->camera.x = -position.getX() + Engine::GetInstance().render->camera.w;
+	}*/
 
-
-		
+	/*if(position.getX())
+		Engine::GetInstance().render->camera.x = (int)(-position.getX() + Engine::GetInstance().render->camera.w / 2);*/
 		Engine::GetInstance().render->camera.y = (int)(-position.getY() + Engine::GetInstance().render->camera.h / 2);
 
 		if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_F10) == KEY_DOWN) {
@@ -88,6 +83,25 @@ bool Player::Update(float dt)
 			if (godMode) { b2Body_SetGravityScale(pbody->body, 0); }else{ b2Body_SetGravityScale(pbody->body, 1); }
 
 		}
+
+
+		if (position.getX() < Engine::GetInstance().render->camera.w / 4 ) {
+
+			Engine::GetInstance().render->camera.x = limitLeft ;
+		}
+		else if (position.getX() > mapSize.getX() - Engine::GetInstance().render->camera.w / 4) {
+
+			/*Engine::GetInstance().render->camera.x = mapSize.getX() - Engine::GetInstance().render->camera.w/2;*/
+		}
+		else{ Engine::GetInstance().render->camera.x = (int)(-position.getX() + Engine::GetInstance().render->camera.w / 2); }
+		float limitUp = Engine::GetInstance().render->camera.h / 4;
+		float limitDown = mapSize.getY() - Engine::GetInstance().render->camera.h;
+		if (position.getY() < Engine::GetInstance().render->camera.h / 4) {
+
+			Engine::GetInstance().render->camera.y = limitUp;
+		}
+		
+		else { Engine::GetInstance().render->camera.y = (int)(-position.getY() + Engine::GetInstance().render->camera.h / 2); }
 	//}
 	///*else if (position.getX() > 1280 - Engine::GetInstance().render->camera.w / 2) {
 	//
@@ -132,6 +146,7 @@ void Player::Move() {
 		isWalking = true;
 		
 	}
+	else { isWalking = false; }
 	if (godMode ) {
 		
 		if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT && !isJumping) {
@@ -154,7 +169,7 @@ void Player::Move() {
 
 		}
 	}
-	else { isWalking = false; }
+	
 	/*else if (isdead) {
 		anims.SetCurrent("death");
 	}*/
