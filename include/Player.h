@@ -56,6 +56,7 @@ public:
 	bool secondJump = false;
 	bool firstJump = true;
 	bool godMode = false;
+	bool isdead = false;
 private: 
 	b2Vec2 velocity;
 	AnimationSet anims;
