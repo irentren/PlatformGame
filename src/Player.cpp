@@ -8,7 +8,7 @@
 #include "Log.h"
 #include "Physics.h"
 #include "EntityManager.h"
-
+#include "Map.h"
 Player::Player() : Entity(EntityType::PLAYER)
 {
 	name = "Player";
@@ -30,7 +30,7 @@ bool Player::Start() {
 	// load
 
 
-	std::unordered_map<int, std::string> aliases = { {11,"idle"},{0,"move"},{4,"jump"},{12,"death"} };
+	std::unordered_map<int, std::string> aliases = { {15,"idle"},{0,"move"},{6,"jump"},{18,"death"} };
 
 
 	anims.LoadFromTSX("Assets/Textures/ghost-export.tsx", aliases);
@@ -66,13 +66,26 @@ bool Player::Update(float dt)
 	Draw(dt);
 
 	
-	
-		Engine::GetInstance().render->camera.x = (int)(-position.getX() + Engine::GetInstance().render->camera.w / 2);
+	Vector2D mapSize = Engine::GetInstance().map->GetMapSizeInPixels();
+	float limitLeft = Engine::GetInstance().render->camera.w / 4;
+	float limitRight = mapSize.getX() - Engine::GetInstance().render->camera.w * 3 / 4;
+	if (position.getX() - limitLeft > 0 && position.getX() < limitRight) {
+		Engine::GetInstance().render->camera.x = -position.getX() + Engine::GetInstance().render->camera.w / 4;
+	}
+	float limitUp = Engine::GetInstance().render->camera.h / 4;
+	float limitDown = mapSize.getY() - Engine::GetInstance().render->camera.h * 3 / 4;
+	if (position.getY() - limitUp > 0 && position.getY() < limitDown) {
+		Engine::GetInstance().render->camera.y = -position.getY() + Engine::GetInstance().render->camera.h / 4;
+	}
+
+
+		
 		Engine::GetInstance().render->camera.y = (int)(-position.getY() + Engine::GetInstance().render->camera.h / 2);
 
 		if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_F10) == KEY_DOWN) {
 
 			godMode = !godMode;
+			if (godMode) { b2Body_SetGravityScale(pbody->body, 0); }else{ b2Body_SetGravityScale(pbody->body, 1); }
 
 		}
 	//}
@@ -92,28 +105,56 @@ bool Player::Update(float dt)
 void Player::GetPhysicsValues() {
 	// Read current velocity
 	velocity = Engine::GetInstance().physics->GetLinearVelocity(pbody);
-	velocity = { 0, velocity.y }; // Reset horizontal velocity by default, this way the player stops when no key is pressed
+	if(!godMode){ velocity = { 0, velocity.y }; }else{ velocity = { 0, 0 }; }
+	 // Reset horizontal velocity by default, this way the player stops when no key is pressed
 }
 
 void Player::Move() {
 	
 	// Move left/right
+	
 	if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT && !isJumping) {
 		velocity.x = -speed;
 		anims.SetCurrent("move");
+		isWalking = true;
 	}
 	else if(Engine::GetInstance().input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT){
 		velocity.x = -speed;
-		
+		isWalking = true;
 	}
-	if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT && !isJumping) {
+	else if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT && !isJumping) {
 		velocity.x = speed;
 		anims.SetCurrent("move");
+		isWalking = true;
 	}
 	else if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT ) {
 		velocity.x = speed;
+		isWalking = true;
 		
 	}
+	if (godMode ) {
+		
+		if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT && !isJumping) {
+			velocity.y = -speed;
+			anims.SetCurrent("move");
+			isWalking = true;
+		}
+		else if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT) {
+			velocity.y = -speed;
+			isWalking = true;
+		}
+		else if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT && !isJumping) {
+			velocity.y = speed;
+			anims.SetCurrent("move");
+			isWalking = true;
+		}
+		else if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT) {
+			velocity.y = speed;
+			isWalking = true;
+
+		}
+	}
+	else { isWalking = false; }
 	/*else if (isdead) {
 		anims.SetCurrent("death");
 	}*/
@@ -122,6 +163,7 @@ void Player::Move() {
 			anims.SetCurrent("jump");
 		
 	}
+	if (!isWalking && !isJumping) { anims.SetCurrent("idle"); }
 }
 
 void Player::Jump() {
@@ -144,6 +186,7 @@ void Player::Jump() {
 		Engine::GetInstance().physics->ApplyLinearImpulseToCenter(pbody, 0.0f, -jumpForce, true);
 		anims.SetCurrent("jump");
 	}
+	
 }
 
 void Player::ApplyPhysics() {
@@ -193,7 +236,7 @@ void Player::OnCollision(PhysBody* physA, PhysBody* physB) {
 		//reset the jump flag when touching the ground
 		isJumping = false;
 		firstJump = true;
-		anims.SetCurrent("idle");
+		
 		break;	
 	case ColliderType::ITEM:
 		LOG("Collision ITEM");
