@@ -58,6 +58,8 @@ public:
 	bool godMode = false;
 	bool isdead = false;
 	bool isWalking = false;
+	
+	/*SDL_Rect& lastFrame;*/
 private: 
 	b2Vec2 velocity;
 	AnimationSet anims;

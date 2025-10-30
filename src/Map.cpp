@@ -206,16 +206,24 @@ bool Map::Load(std::string path, std::string fileName)//
 
         //Iterate the layer and create colliders
         for (const auto& objectGroup : mapData.objectgroups) {
-            if (objectGroup->name == "Collisions2") { 
+            if (objectGroup->name == "suelo") { 
                 for (const auto& object : objectGroup->objects) {
                     PhysBody* c1 = Engine::GetInstance().physics.get()->CreateRectangle(object->x + object->width / 2, object->y + object->height / 2, object->width, object->height, STATIC);
                     c1->ctype = ColliderType::PLATFORM;
                 }
             }
         }
+        for (const auto& objectGroup : mapData.objectgroups) {
+            if (objectGroup->name == "paredes") {
+                for (const auto& object : objectGroup->objects) {
+                    PhysBody* c1 = Engine::GetInstance().physics.get()->CreateRectangle(object->x + object->width / 2, object->y + object->height / 2, object->width, object->height, STATIC);
+                    c1->ctype = ColliderType::PARED;
+                }
+            }
+        }
 
         for (const auto& objectGroup : mapData.objectgroups) {
-            if (objectGroup->name == "Collisions3") {
+            if (objectGroup->name == "spikes") {
                 for (const auto& object : objectGroup->objects) {
                     PhysBody* c1 = Engine::GetInstance().physics.get()->CreateRectangle(object->x + object->width / 2, object->y + object->height / 2, object->width, object->height, STATIC);
                     c1->ctype = ColliderType::UNKNOWN;

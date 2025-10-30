@@ -94,14 +94,20 @@ bool Player::Update(float dt)
 			/*Engine::GetInstance().render->camera.x = mapSize.getX() - Engine::GetInstance().render->camera.w/2;*/
 		}
 		else{ Engine::GetInstance().render->camera.x = (int)(-position.getX() + Engine::GetInstance().render->camera.w / 2); }
+		
 		float limitUp = Engine::GetInstance().render->camera.h / 4;
-		float limitDown = mapSize.getY() - Engine::GetInstance().render->camera.h;
+		float limitDown = mapSize.getY() + Engine::GetInstance().render->camera.h;
 		if (position.getY() < Engine::GetInstance().render->camera.h / 4) {
 
 			Engine::GetInstance().render->camera.y = limitUp;
 		}
+		else if (position.getY() > mapSize.getY() - Engine::GetInstance().render->camera.h/2 ) {
 		
-		else { Engine::GetInstance().render->camera.y = (int)(-position.getY() + Engine::GetInstance().render->camera.h / 2); }
+
+			/*Engine::GetInstance().render->camera.y = limitDown;*/
+		}
+		
+		else { Engine::GetInstance().render->camera.y = (int)(-position.getY() + Engine::GetInstance().render->camera.h/2); }
 	//}
 	///*else if (position.getX() > 1280 - Engine::GetInstance().render->camera.w / 2) {
 	//
@@ -126,59 +132,64 @@ void Player::GetPhysicsValues() {
 void Player::Move() {
 	
 	// Move left/right
-	
-	if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT && !isJumping) {
-		velocity.x = -speed;
-		anims.SetCurrent("move");
-		isWalking = true;
-	}
-	else if(Engine::GetInstance().input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT){
-		velocity.x = -speed;
-		isWalking = true;
-	}
-	else if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT && !isJumping) {
-		velocity.x = speed;
-		anims.SetCurrent("move");
-		isWalking = true;
-	}
-	else if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT ) {
-		velocity.x = speed;
-		isWalking = true;
-		
-	}
-	else { isWalking = false; }
-	if (godMode ) {
-		
-		if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT && !isJumping) {
-			velocity.y = -speed;
+	if (!isdead) {
+
+
+		if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT && !isJumping) {
+			velocity.x = -speed;
 			anims.SetCurrent("move");
 			isWalking = true;
 		}
-		else if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT) {
-			velocity.y = -speed;
+		else if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT) {
+			velocity.x = -speed;
 			isWalking = true;
 		}
-		else if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT && !isJumping) {
-			velocity.y = speed;
+		else if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT && !isJumping) {
+			velocity.x = speed;
 			anims.SetCurrent("move");
 			isWalking = true;
 		}
-		else if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT) {
-			velocity.y = speed;
+		else if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT) {
+			velocity.x = speed;
 			isWalking = true;
 
 		}
+		else { isWalking = false; }
+		if (godMode) {
+
+			if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT && !isJumping) {
+				velocity.y = -speed;
+				anims.SetCurrent("move");
+				isWalking = true;
+			}
+			else if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT) {
+				velocity.y = -speed;
+				isWalking = true;
+			}
+			else if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT && !isJumping) {
+				velocity.y = speed;
+				anims.SetCurrent("move");
+				isWalking = true;
+			}
+			else if (Engine::GetInstance().input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT) {
+				velocity.y = speed;
+				isWalking = true;
+
+			}
+		}
+
+
+		if (isJumping) {
+
+			anims.SetCurrent("jump");
+
+		}
+		if (!isWalking && !isJumping) { anims.SetCurrent("idle"); }
 	}
-	
-	/*else if (isdead) {
+	/*else {
 		anims.SetCurrent("death");
 	}*/
-	if(isJumping){
-		
-			anims.SetCurrent("jump");
-		
-	}
-	if (!isWalking && !isJumping) { anims.SetCurrent("idle"); }
+	
 }
 
 void Player::Jump() {
@@ -217,7 +228,15 @@ void Player::ApplyPhysics() {
 void Player::Draw(float dt) {
 
 	anims.Update(dt);
+	
 	const SDL_Rect& animFrame = anims.GetCurrentFrame();
+	if (animFrame.x == 160 && animFrame.y == 96 && isdead) {
+
+		
+		Reset();
+
+	}
+	
 
 	// Update render position using your PhysBody helper
 	int x, y;
@@ -240,6 +259,7 @@ void Player::Reset()
 	b2Vec2 initialPos = { PIXEL_TO_METERS(86), PIXEL_TO_METERS(86) };
 	b2Rot rotation = b2MakeRot(0.0f);
 	b2Body_SetTransform(pbody->body, initialPos, rotation);
+	isdead = false;
 }
 
 // L08 TODO 6: Define OnCollision function for the player. 
@@ -252,7 +272,12 @@ void Player::OnCollision(PhysBody* physA, PhysBody* physB) {
 		isJumping = false;
 		firstJump = true;
 		
-		break;	
+		break;
+	case ColliderType::PARED:
+		LOG("Collision PARED");
+		isJumping = false;
+
+		break;
 	case ColliderType::ITEM:
 		LOG("Collision ITEM");
 		Engine::GetInstance().audio->PlayFx(pickCoinFxId);
@@ -265,7 +290,10 @@ void Player::OnCollision(PhysBody* physA, PhysBody* physB) {
 		if (!godMode) {
 			LOG("Collision DEATH");
 			isdead = true;
-			Reset();
+			anims.SetCurrent("death");
+			
+			
+			
 		}
 
 		break;
@@ -286,6 +314,9 @@ void Player::OnCollisionEnd(PhysBody* physA, PhysBody* physB)
 		break;
 	case ColliderType::UNKNOWN:
 		LOG("End Collision UNKNOWN");
+		break;
+	case ColliderType::PARED:
+		LOG("End Collision PARED");
 		break;
 	default:
 		break;
